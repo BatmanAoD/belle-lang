@@ -4,18 +4,25 @@
 // This uses a "linked list of buffers" strategy.
 
 #IntVector
-{
   #Node
-  {
     // The data members. All are "private" by default.
     ##data
       // heap-allocated array of `64` ints owned by the Node instance
+      // TODO decide if there's a better way to handle the possibility of long
+      // lines than `\` or `;`
       data_segment_ : *[int]#64;
       // Each segment owns the next segment
       next : *Node;
       size_ : int;
 
+    // TODO alternate name: interface, maybe?
     ##requests
+      // To prohibit deep copying, we would do this:
+      // ! <-deep;
+      // This is because `!` at the beginning of a declaration in the
+      // `##requests` section indicates that the request is *not* recognized,
+      // and `<-deep` is the "deep copy" method
+
       // "forward" the [] operator request to the data_segment_ member
       // ...[] syntax?
       // provide a way to be explicit about what member of data_segment is
@@ -57,17 +64,14 @@
         // Shorthand for data_segment_(:Heap.Allocate), a call to the
         // array-constructor for initialization via the Allocate method on the
         // default Heap object
-        ! data_segment_;
+        // TODO reconsider the choice of symbols
+        ~ data_segment_;
         // Shorthand for size_() (int "default ctors" set to 0)
-        // TODO why isn't the shorthand just `size_;`, as in C++? This is
-        // confusing in lots of C++ code, but in an `##init` section, it's
-        // perfectly obvious what's going on.
-        ~ size_;
+        size_;
         // Shorthand for next(null), which "constructs" the pointer
         // as `null`
-        ~ next;
+        next;
       }
-  }
 
   ##data
     head_ : Node;
@@ -78,8 +82,8 @@
     size_ : int;
 
   ##requests
-    // Alternatively, [](int n) as in C++
-    [int n] -> &int
+    // Alternatively, [int n] ...?
+    [] (int n) -> &int
     {
       // for this example, just assume request is within bounds (i.e. don't
       // compare to 'size')
@@ -96,21 +100,37 @@
     {
       // TODO decide how to handle blocks and such....Ruby and Python are both
       // nicer than C++
-      last_seg_ : &Node (head_);
-      while (last_seg_.isFull)
-      {
-        // In an expression, `~` evaluates to "is default-constructed", which in
-        // this case means "is nullptr"
-        // TODO this looks exactly the OPPOSITE of how it would look in C++;
-        // consider switching the meanings of ~ and !, or...something...
-        // Note that functions that take no args don't need parens, since
-        // they're "requests" rather than potential members.
-        if (~last_seg_.next) last_seg_.init_next;
-        last_seg_ <- containing_seg_.next;
-      }
+      // TODO pick a nice syntax (possibly keep the Ruby-ish version) for
+      // passing in block-like/lambda-like expressions
+      last_seg_ : &Node (traverse
+        {|seg|
+          <- !seg.isFull;
+        },
+        {|seg|
+          // In an expression, `!` evaluates to "is default-constructed", which in
+          // this case means "is nullptr" (for ints it is equivalent to "is 0")
+          // Note that functions that take no args don't need parens, since
+          // they're "requests" rather than potential members.
+          if (!seg.next) seg.init_next;
+        }
+      );
       last_seg_.append(n)
     }
 
+  ##aux
+    // TODO decide whether to distinguish "callable" from "symbol"
+    // =! means the arg is optional, and, if not given, is a no-op
+    traverse ( :condition , :operation=! ) -> &Node
+    {
+      seg_iter : &Node (head_);
+      until (condition(seg_iter))
+      {
+        operation(seg_iter);
+        seg_iter <- seg_iter.next;
+      }
+      <- seg_iter
+    }
+        
     // TODO move link-traversing code to an auxiliary func taking a conditional
     // expression lambda thing
 
@@ -121,4 +141,3 @@
       ~ last_;
       ~ size_;
     }
-}
