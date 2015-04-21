@@ -4,7 +4,10 @@
 // This uses a "linked list of buffers" strategy.
 
 #IntVector
+{
+// XXX arguably the concept of "nested classes" is of questionable utility.
   #Node
+  {
     // The data members. All are "private" by default.
     ##data
       // heap-allocated array of `64` ints owned by the Node instance
@@ -44,14 +47,11 @@
         ++size;
       }
 
-      init_next -> &Node
+      init_next
       {
         // The `!` shorthand is only valid in an `##init` section, so we don't
         // use it here.
         next(:Heap.Allocate);
-        // <- is the "return" statement
-        // <-* would be a transfer of ownership
-        <- next
       }
 
       isFull -> bool
@@ -72,9 +72,11 @@
         // as `null`
         next;
       }
+  }
 
   ##data
-    head_ : Node;
+    // Could also make head a value rather than a pointer
+    head_ : *Node;
     // First non-empty member of first segment
     first_ : int;
     // First empty member of last segment
@@ -83,17 +85,21 @@
 
   ##requests
     // Alternatively, [int n] ...?
-    [] (int n) -> &int
+    [] (int i) -> &int
     {
       // for this example, just assume request is within bounds (i.e. don't
       // compare to 'size')
       // `/%` divides and returns quotient AND remainder
-      seg_no , index : int ( n - start_ ) /% 64;
-      containing_seg_ : &Node (head_);
-      // <- is assignment, too
-      while (seg_no > 0) containing_seg_ <- containing_seg_.next;
+      seg_no , index : int ( i - start_ ) /% 64;
+      containing_seg : traverse(
+        {|seg|
+          <- 0 < seg_no--;
+        }
+      );
       // The last statement in a block does not need a `;`
-      <- containing_seg_[index]
+      // <- is the "return" statement
+      // <-* would be a transfer of ownership
+      <- containing_seg[index]
     }
 
     append (int n)
@@ -102,7 +108,7 @@
       // nicer than C++
       // TODO pick a nice syntax (possibly keep the Ruby-ish version) for
       // passing in block-like/lambda-like expressions
-      last_seg_ : &Node (traverse
+      last_seg : traverse(
         {|seg|
           <- !seg.isFull;
         },
@@ -114,7 +120,8 @@
           if (!seg.next) seg.init_next;
         }
       );
-      last_seg_.append(n)
+      ++size_;
+      last_seg.append(n)
     }
 
   ##aux
@@ -126,13 +133,11 @@
       until (condition(seg_iter))
       {
         operation(seg_iter);
+        // <- is copy-assignment, too (oo confusing?)
         seg_iter <- seg_iter.next;
       }
       <- seg_iter
     }
-        
-    // TODO move link-traversing code to an auxiliary func taking a conditional
-    // expression lambda thing
 
   ##init
     {
@@ -141,3 +146,4 @@
       ~ last_;
       ~ size_;
     }
+}
