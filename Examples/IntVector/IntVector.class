@@ -1,0 +1,124 @@
+// Belle implementation of a non-template vector-like type.
+// The standard library will presumably implement a templated version; this is
+// merely an exercise.
+// This uses a "linked list of buffers" strategy.
+
+#IntVector
+{
+  #Node
+  {
+    // The data members. All are "private" by default.
+    ##data
+      // heap-allocated array of `64` ints owned by the Node instance
+      data_segment_ : *[int]#64;
+      // Each segment owns the next segment
+      next : *Node;
+      size_ : int;
+
+    ##requests
+      // "forward" the [] operator request to the data_segment_ member
+      // ...[] syntax?
+      // provide a way to be explicit about what member of data_segment is
+      // actually called?
+      [] :> data_segment_;
+
+      // Allow access via pointer to member 
+      // TODO control read/write here?
+      // Alternate syntaxes? Explicit ->&, @next&, etc...?
+      // Or should this be more explicit, and the "property syntactic sugar"
+      // would go in the declaration under ##data?
+      next :@ &;
+
+      append (int n)
+      {
+        // Assume not full (handled by IntVector)
+        self[size_] := n;
+        // TODO do I really want the increment/decrement operators?
+        ++size;
+      }
+
+      init_next -> &Node
+      {
+        // The `!` shorthand is only valid in an `##init` section, so we don't
+        // use it here.
+        next(:Heap.Allocate);
+        // <- is the "return" statement
+        // <-* would be a transfer of ownership
+        <- next
+      }
+
+      isFull -> bool
+      { size_ == 64 }
+
+    ##init
+      // See below for non-default initialization.
+      // Default initialization is indicated with no arguments.
+      {
+        // Shorthand for data_segment_(:Heap.Allocate), a call to the
+        // array-constructor for initialization via the Allocate method on the
+        // default Heap object
+        ! data_segment_;
+        // Shorthand for size_() (int "default ctors" set to 0)
+        // TODO why isn't the shorthand just `size_;`, as in C++? This is
+        // confusing in lots of C++ code, but in an `##init` section, it's
+        // perfectly obvious what's going on.
+        ~ size_;
+        // Shorthand for next(null), which "constructs" the pointer
+        // as `null`
+        ~ next;
+      }
+  }
+
+  ##data
+    head_ : Node;
+    // First non-empty member of first segment
+    first_ : int;
+    // First empty member of last segment
+    last_ : int;
+    size_ : int;
+
+  ##requests
+    // Alternatively, [](int n) as in C++
+    [int n] -> &int
+    {
+      // for this example, just assume request is within bounds (i.e. don't
+      // compare to 'size')
+      // `/%` divides and returns quotient AND remainder
+      seg_no , index : int ( n - start_ ) /% 64;
+      containing_seg_ : &Node (head_);
+      // <- is assignment, too
+      while (seg_no > 0) containing_seg_ <- containing_seg_.next;
+      // The last statement in a block does not need a `;`
+      <- containing_seg_[index]
+    }
+
+    append (int n)
+    {
+      // TODO decide how to handle blocks and such....Ruby and Python are both
+      // nicer than C++
+      last_seg_ : &Node (head_);
+      while (last_seg_.isFull)
+      {
+        // In an expression, `~` evaluates to "is default-constructed", which in
+        // this case means "is nullptr"
+        // TODO this looks exactly the OPPOSITE of how it would look in C++;
+        // consider switching the meanings of ~ and !, or...something...
+        // Note that functions that take no args don't need parens, since
+        // they're "requests" rather than potential members.
+        if (~last_seg_.next) last_seg_.init_next;
+        last_seg_ <- containing_seg_.next;
+      }
+      last_seg_.append(n)
+    }
+
+    // TODO move link-traversing code to an auxiliary func taking a conditional
+    // expression lambda thing
+
+  ##init
+    {
+      ! head_;
+      first_(-1);
+      ~ last_;
+      ~ size_;
+    }
+}
