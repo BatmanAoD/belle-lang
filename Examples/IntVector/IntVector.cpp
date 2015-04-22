@@ -29,6 +29,7 @@ class IntVector
         delete[] data_segment_;
       }
 
+      // For `<-deep`
       Node(const Node& rhs)
         data_segment_{new int[64]},
         size_{rhs.size_}

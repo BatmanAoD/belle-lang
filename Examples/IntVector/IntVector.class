@@ -51,7 +51,8 @@
       {
         // The `!` shorthand is only valid in an `##init` section, so we don't
         // use it here.
-        next(:Heap.Allocate);
+        // Since we are doing default construction, we skip the (args...)
+        next{ <-* :Heap.Allocate};
       }
 
       isFull -> bool
@@ -61,7 +62,7 @@
       // See below for non-default initialization.
       // Default initialization is indicated with no arguments.
       {
-        // Shorthand for data_segment_(:Heap.Allocate), a call to the
+        // Shorthand for data_segment_{ <-* :Heap.Allocate}, a call to the
         // array-constructor for initialization via the Allocate method on the
         // default Heap object
         // TODO reconsider the choice of symbols
