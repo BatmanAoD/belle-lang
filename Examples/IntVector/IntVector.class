@@ -47,7 +47,7 @@
         ++size;
       }
 
-      init_next
+      initNext
       {
         // The `!` shorthand is only valid in an `##init` section, so we don't
         // use it here.
@@ -56,7 +56,7 @@
       }
 
       isFull -> bool
-      { size_ == 64 }
+      { <- size_ == 64 }
 
     ##init
       // See below for non-default initialization.
@@ -91,6 +91,7 @@
       // for this example, just assume request is within bounds (i.e. don't
       // compare to 'size')
       // `/%` divides and returns quotient AND remainder
+      // XXX what is `int` doing here?
       seg_no , index : int ( i - start_ ) /% 64;
       containing_seg : traverse(
         {|seg|
@@ -118,7 +119,7 @@
           // this case means "is nullptr" (for ints it is equivalent to "is 0")
           // Note that functions that take no args don't need parens, since
           // they're "requests" rather than potential members.
-          if (!seg.next) seg.init_next;
+          if (!seg.next) seg.initNext;
         }
       );
       ++size_;
