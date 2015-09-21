@@ -40,6 +40,8 @@ Can include data members (as in traditional C++)
 Misc
 ----
 
+Explicit parameter names at *call* site (like Python but mandatory), overload on *param names* rather than types
+
 Way of passing method names, a la Ruby symbols? (Compile-time only)
 
 “message-oriented”--consider how to make this “truly” OO a la Alan Kays
