@@ -1,3 +1,33 @@
+Auto-generated multi-purpose API files (headers)
+------------------------------------------------
+
+"API files" would be like C++ header files, but auto-generated fro source code.
+
+They would contain the following information:
+
+ * C++ header information, i.e., everything needed to compile classes that `import`
+   the class being compiled
+   * type definitions
+   * total size, including padding, of the object (but *not* names and explicit
+     types of private data members)
+   * Public function signatures
+   * ...etc
+ * Documentation-comments (copied from source file)
+ * Pre- and post- conditions (**these should be a first-class language feature**,
+   and post-conditions should facilitate autogeneration of tests (?)). Post-conditions
+   would **include** separate cases for error-handling (a la Rust's `Result` type).
+
+This would be the first step in compilation; after all API files have been generated,
+piecewise compilation of the system would be trivial.
+
+This would allow auto-detection and propagation of `mut` (or `const`), `constexpr`,
+etc. It would also allow developers to have a simple and *reliable* API to look at,
+which would be parsable (by autocompletion tools, etc) as well.
+
+Note that circular `import`s (if that's allowed) would make generation of these APIs
+fairly complicated; there would, for instance, need to be `mut` "placeholders" until
+all source files have been examined.
+
 Polymorphic types
 -----------------
 
