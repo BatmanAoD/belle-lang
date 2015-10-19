@@ -72,6 +72,8 @@ Misc
 
 Explicit parameter names at *call* site (like Python but mandatory), overload on *param names* rather than types
 
+For short-lived valuable non-memory resources, I prefer Python's `with **** as var:` and Ruby's `acquire(x) do |var|` to RAII, i.e., explicit rather than implicit scopes *for* each resource. **But** I want to look into D's `scope(end)`, which sounds very interesting. Also, I'm not sure how this can be generalized to longer-lived resources, whereas RAII is *very* extensible/scalable/generalizable.
+
 Way of passing method names, a la Ruby symbols? (Compile-time only)
 
 “message-oriented”--consider how to make this “truly” OO a la Alan Kays
