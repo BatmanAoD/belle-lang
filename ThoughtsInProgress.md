@@ -18,7 +18,11 @@ They would contain the following information:
    would **include** separate cases for error-handling (a la Rust's `Result` type).
 
 This would be the first step in compilation; after all API files have been generated,
-piecewise compilation of the system would be trivial.
+piecewise compilation of the system would be trivial. It would also make partial builds
+quicker: since API files are auto-generated, they could include a hash at the top
+generated from the build-relevant aspects of the file (i.e., comments are not
+used in the hash generation); downstream build targets would only be rebuilt if
+this hash changes.
 
 This would allow auto-detection and propagation of `mut` (or `const`), `constexpr`,
 etc. It would also allow developers to have a simple and *reliable* API to look at,
