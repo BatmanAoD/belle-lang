@@ -22,8 +22,14 @@ Design goals:
 The name
 --------
 
-// TODO
+My daughter's name is Annabelle, so the language is named after her. There are a number of secondary considerations:
 
-From *Go To* by Steve Lohr:
-
-> Belle was the first computer to attain the level of a chess master
+ * I wanted a one-syllable easy-to-remember name
+ * I wanted a name that was not already associated with a popular technology, especially another
+   programming language.
+ * I like the semantic association of "beauty," since I would like to create a "beautiful" language
+   (in some intuitive sense--Ruby and Python are "beautiful" to me, while C++ and Perl are not).
+ * I like the phonetic association with Bell Labs.
+ * From *Go To* by Steve Lohr:
+ 
+       > Belle was the first computer to attain the level of a chess master
