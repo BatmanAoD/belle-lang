@@ -71,8 +71,41 @@ Can include data members (as in traditional C++)
 
 "Forwarding" is *explicit*
 
+"Sections"
+----------
+
+Class definitions should have "sections" a la Markdown, possibly even using
+`#`, `##`, etc. So far, this is somewhat similar to C++'s access-modifier sections but
+with a different syntax. There are two possible ways to develop 'sections'.
+
+##Arbitrary attributes
+
+* Nesting (i.e. subsections) is permissible
+* Attributes (e.g. access-spec, static/virtual, .... ? ):
+  * The attributes bestowed by each section are *separate* from the section's
+    *name* and can be *arbitrary* so long as they do not conflict with the
+    attributes bestowed by supersections.
+  * Members of classes 'inherit' all attributes listed by all containing
+    sections; all other attributes must be specified manually (or have defaults).
+
+##Member-type attributes
+
+This is the idea used in the current `IntVector.class` example: `#` indicates a
+class, while `##` indicates a section. Member-variables are in the `##data`
+section, public methods are in the `##requests` section, the constructor is in
+its own `##init` section, and private methods are in the `##aux` section.
+
 Misc
 ----
+
+Compile-time evaluation (C++ `constexpr`) should be syntactically/semantically
+linked with the concept of `static` data; the idea is that *the result of a
+compile-time evaluation is always **data** that is embedded in the binary*. The
+`static` keyword will always be associated with *data* that is *generated* (or
+available as a literal) *at compile time*. (If static data is not used in the
+runtime, it will not be embedded. Static data that can be easily shown with
+static analysis to have no possible use regardless of feature-switches, etc.
+will trigger an error.)
 
 Explicit parameter names at *call* site (like Python but mandatory), overload on *param names* rather than types
 
@@ -87,3 +120,4 @@ would make software updates possible without recompiling *or* relinking, but
 might cause huge overhead. Additionally, the "text" segment in ELF files is
 apparently read-only, so the process would have to...restart itself, or
 something? Would this even be worthwhile?
+
