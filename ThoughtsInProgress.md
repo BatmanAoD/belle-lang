@@ -107,9 +107,18 @@ runtime, it will not be embedded. Static data that can be easily shown with
 static analysis to have no possible use regardless of feature-switches, etc.
 will trigger an error.)
 
-Explicit parameter names at *call* site (like Python but mandatory), overload on *param names* rather than types
+Assertions will be analyzed to determine whether they can simply be evaluated
+at compile or link time and, if so, will trigger compile or link errors.
 
-For short-lived valuable non-memory resources, I prefer Python's `with **** as var:` and Ruby's `acquire(x) do |var|` to RAII, i.e., explicit rather than implicit scopes *for* each resource. **But** I want to look into D's `scope(end)`, which sounds very interesting. Also, I'm not sure how this can be generalized to longer-lived resources, whereas RAII is *very* extensible/scalable/generalizable.
+Explicit parameter names at *call* site (like Python but mandatory), overload
+on *param names* rather than types
+
+For short-lived valuable non-memory resources, I prefer Python's `with **** as
+var:` and Ruby's `acquire(x) do |var|` to RAII, i.e., explicit rather than
+implicit scopes *for* each resource. **But** I want to look into D's
+`scope(end)`, which sounds very interesting. Also, I'm not sure how this can be
+generalized to longer-lived resources, whereas RAII is *very*
+extensible/scalable/generalizable.
 
 Way of passing method names, a la Ruby symbols? (Compile-time only)
 
