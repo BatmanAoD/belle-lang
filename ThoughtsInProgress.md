@@ -95,6 +95,19 @@ class, while `##` indicates a section. Member-variables are in the `##data`
 section, public methods are in the `##requests` section, the constructor is in
 its own `##init` section, and private methods are in the `##aux` section.
 
+Enums
+-----
+
+Support something like C++ scoped enums, but:
+
+ * Somehow permit overlapping *subsets* (e.g. think of error codes--some apply
+   to multiple situations, but not all)
+ * Special "alias" subsets--otherwise mutliple values w/ same name not permitted
+ * If-needed support for *iterating* over enums or over subsets of enums
+    * Implementation: at compile time, if iteration is requested, generate a
+      zipped pair of arrays (or similar) representing where "jumps" happen and
+      how far to jump (either an index or a step-size)
+
 Misc
 ----
 
