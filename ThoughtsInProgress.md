@@ -143,3 +143,6 @@ might cause huge overhead. Additionally, the "text" segment in ELF files is
 apparently read-only, so the process would have to...restart itself, or
 something? Would this even be worthwhile?
 
+For (basic) signed integers, `0xFFFF...` should *always* be an invalid value.
+It's tempting to say that this should also hold for signed integers.
+This should also be the default initialization value.
