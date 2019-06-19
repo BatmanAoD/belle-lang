@@ -126,6 +126,12 @@ at compile or link time and, if so, will trigger compile or link errors.
 Explicit parameter names at *call* site (like Python but mandatory), overload
 on *param names* rather than types
 
+Generalize Ruby's blocks with Currying: callable parameters are syntactically
+separate from groups of data-only parameters. E.g. a function signature could
+be:
+
+    fn my_fun(arg1: int, arg2: string){callable_arg1}(arg3: double){callable_arg2}
+
 For short-lived valuable non-memory resources, I prefer Python's `with **** as
 var:` and Ruby's `acquire(x) do |var|` to RAII, i.e., explicit rather than
 implicit scopes *for* each resource. **But** I want to look into D's
