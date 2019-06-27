@@ -1,11 +1,11 @@
-#Pointers and ownership
+## Pointers and ownership
 
 `*, &, $` for pointer ownership:
 -- raw: like C++/C
 -- owning: like `unique_ptr` (can release, etc…for C++ multi-proc interface)
 -- shared: allocate block w/ vector of owner addresses, notify (??)
 
-#Arrays
+## Arrays
 
 [MyClass]#elems  -- local, elems elements
 &[MyClass]#elems   -- heap (could use * or $)
@@ -16,21 +16,21 @@
 array.method, e.g. for reduce op
 (way to specify whether op is commutative/associative for parallelization/optimization)
 
-#Method ("request") naming
+## Method ("request") naming
 
 ! for destructive methods?
 
-#Meta section
+## Meta section
 
 `##Meta` section is for static methods and Python-like "metaclass" stuff; e.g. for
 redefining Type.New
 
-#Keywords
+## Keywords
 
  * consider "redefines" keyword for overriding things (since overriding has
    inheritance connotations
 
-#Request forwarding
+## Request forwarding
 
  * EXPLICIT for mixins! Each request name is _forwarded_ to the mixin and
    optionally renamed
@@ -41,7 +41,7 @@ redefining Type.New
    * comparison (both equality and inequality)
    * arithmetic
 
-#Allocation/initialization
+## Allocation/initialization
 
 Explicit allocation syntax:
 
@@ -59,13 +59,13 @@ a `new` statement for now.)
 `std::initializer_list`. This avoids the "uniform init/std::init-list"
 confusion.
 
-#Copying/assignment
+## Copying/assignment
 
 `<-deep` for deep copy--or maybe `<-deep|` to prevent dependence on whitespace?
 
 any use for `:=`?
 
-#Preconditions/postconditions
+## Preconditions/postconditions
 
 :=> and <=: should represent something like preconditions/postconditions, or
 possibly even event signals.
