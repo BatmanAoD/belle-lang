@@ -1,5 +1,4 @@
-Auto-generated multi-purpose API files (headers)
-------------------------------------------------
+## Auto-generated multi-purpose API files (headers)
 
 "API files" would be like C++ header files, but auto-generated fro source code.
 
@@ -32,8 +31,7 @@ Note that circular `import`s (if that's allowed) would make generation of these 
 fairly complicated; there would, for instance, need to be `mut` "placeholders" until
 all source files have been examined.
 
-Polymorphic types
------------------
+## Polymorphic types
 
 "Variadic" types--like unions, but must include a way to know which member(s) are active
  * Replaces casting! All "casts" are done via implicit function-parameter
@@ -61,8 +59,7 @@ to determine all qualifiers (e.g. C++'s `const`). (Runtime-)polymorphic types,
 however, represent an *interface*, and therefore it makes sense to add
 qualifiers.
 
-"Mixins"
---------
+## "Mixins"
 
 A la Ruby--separates the idea of *added functionality via inheritance* from the
 "polymorphism" features of inheritance
@@ -71,14 +68,13 @@ Can include data members (as in traditional C++)
 
 "Forwarding" is *explicit*
 
-"Sections"
-----------
+## "Sections"
 
 Class definitions should have "sections" a la Markdown, possibly even using
 `#`, `##`, etc. So far, this is somewhat similar to C++'s access-modifier sections but
 with a different syntax. There are two possible ways to develop 'sections'.
 
-##Arbitrary attributes
+### Arbitrary attributes
 
 * Nesting (i.e. subsections) is permissible
 * Attributes (e.g. access-spec, static/virtual, .... ? ):
@@ -88,15 +84,14 @@ with a different syntax. There are two possible ways to develop 'sections'.
   * Members of classes 'inherit' all attributes listed by all containing
     sections; all other attributes must be specified manually (or have defaults).
 
-##Member-type attributes
+### Member-type attributes
 
 This is the idea used in the current `IntVector.class` example: `#` indicates a
 class, while `##` indicates a section. Member-variables are in the `##data`
 section, public methods are in the `##requests` section, the constructor is in
 its own `##init` section, and private methods are in the `##aux` section.
 
-Enums
------
+## Enums
 
 Support something like C++ scoped enums, but:
 
@@ -108,8 +103,7 @@ Support something like C++ scoped enums, but:
       zipped pair of arrays (or similar) representing where "jumps" happen and
       how far to jump (either an index or a step-size)
 
-Misc
-----
+## Misc
 
 Compile-time evaluation (C++ `constexpr`) should be syntactically/semantically
 linked with the concept of `static` data; the idea is that *the result of a
