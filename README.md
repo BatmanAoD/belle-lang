@@ -1,13 +1,11 @@
-The Belle programming language
-------------------------------
+# The Belle programming language
 
 This language is intended as a low-level language with capabilities similar to
 those of C++, but adhering to a more semantically meaningful design philosophy.
 
-Design goals
-------------
+## Design goals
 
-###Known goals
+### Known goals
 
  * support the low-level control of memory management and stack/heap allocation
  * "don't pay for what you don't use" (a la Rust, C++)
@@ -17,7 +15,7 @@ Design goals
  * True "message-passing"
  * First-class support for managing synchronous or asynchronous control-flow
 
-###Possible goals
+### Possible goals
 
  * Re-evaluation of what "object oriented" means and what aspects are useful
  * Support for some functional-programming paradigms
@@ -37,8 +35,7 @@ Design goals
  * Review [Jonathan Blow's presentation about his desires for a new programming language
    ](https://www.youtube.com/watch?v=TH9VCN6UkyQ)
 
-The name
---------
+## The name
 
 My daughter's name is Annabelle, so the language is named after her. There are a number of secondary considerations:
 
