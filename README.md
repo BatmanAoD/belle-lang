@@ -1,11 +1,20 @@
 # The Belle programming language
 
-This language is intended as a low-level language with capabilities similar to
-those of C++, but adhering to a more semantically meaningful design philosophy.
+If I ever create a language, I will call it "Belle".
+
+I had originally thought I would try to create a low-level language with capabilities
+similar to those of C++, but adhering to a more semantically meaningful design philosophy.
+However, I believe that Rust satisfies this niche quite well, and that the next
+area of language design that needs to be improved is in higher-level languages.
 
 ## Design goals
 
 ### Known goals
+
+Currently... none. This repo is primarily for writing down any language design ideas
+that I have.
+
+### Possible goals
 
  * support the low-level control of memory management and stack/heap allocation
  * "don't pay for what you don't use" (a la Rust, C++)
@@ -14,9 +23,6 @@ those of C++, but adhering to a more semantically meaningful design philosophy.
  * Better "default" behavior, generated code, etc
  * True "message-passing"
  * First-class support for managing synchronous or asynchronous control-flow
-
-### Possible goals
-
  * Re-evaluation of what "object oriented" means and what aspects are useful
  * Support for some functional-programming paradigms
  * Interactivity: not yet well-defined (see [The Legacy of
