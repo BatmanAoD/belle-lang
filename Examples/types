@@ -1,0 +1,27 @@
+type Foo {
+}
+
+type Bar Foo
+
+fn (Foo).data() -> i32 {
+    // ... 
+}
+
+fn (mut Foo).set(i: i32) {
+    // ... 
+}
+
+// `~` means 'unique'; it has value-semantics. `~` calls are destructive.
+fn (~FooBuilder).transform() -> Foo {
+    // ...
+}
+
+fn (~FooBuilder).drop() {
+}
+
+// "trait-like" terms:
+// contract - types promise something, e.g. `Sync`, `Send`, `Copy`, `!Drop`...
+// interface - available functions/methods
+
+// Idea: types _imply_ interfaces? I.e. it is not a breaking change to turn
+// `type Foo` into `interace Foo` with a default implementation
