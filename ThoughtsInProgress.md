@@ -1,6 +1,38 @@
+## "message-passing": async & non-local
+
+Types could accept "requests"; a "request" is a function where:
+
+* the parameter and output types are serializable
+* the output is async: it is a "future" that will be populated when the type
+  responds
+* the receiver object:
+  * is owned by the runtime (i.e. GC'd or static)
+  * runs in its own green-thread
+  * cannot be accessed directly (only through a "handle" - see below)
+
+This would enable first-class language support for a message passing system. A
+"handle" wrapper-type would expose a type's "requests" API, but none of the
+other methods implemented by the type. "Same thread" handles would simply
+invoke the request methods as normal method calls; in a multi-threaded or
+distributed context, handles could use other mechanisms, such as channels or
+TCP.
+
+Since handles would have identical APIs regardless of how they send and receive
+requests, this would facilitate dramatic refactorings, such as moving an object
+from one node to another in a distributed system.
+
+Additionally, request APIs could easily be versioned and published, ensuring
+modularity.
+
+Types can implement a "receiver" API *and* a "normal" synchronous-method-call
+API. If a type is used as a "normal" object, the "requests" can be invoked as
+synchronous methods. (When used in this way, a "handle" to the object cannot be
+created, unless it "consumes" the object, transferring ownership to the
+runtime.)
+
 ## Auto-generated multi-purpose API files (headers)
 
-"API files" would be like C++ header files, but auto-generated fro source code.
+"API files" would be like C++ header files, but auto-generated from source code.
 
 They would contain the following information:
 
@@ -97,13 +129,27 @@ Support something like C++ scoped enums, but:
 
  * Somehow permit overlapping *subsets* (e.g. think of error codes--some apply
    to multiple situations, but not all)
- * Special "alias" subsets--otherwise mutliple values w/ same name not permitted
+ * Special "alias" subsets--otherwise multiple values w/ same name not permitted
  * If-needed support for *iterating* over enums or over subsets of enums
     * Implementation: at compile time, if iteration is requested, generate a
       zipped pair of arrays (or similar) representing where "jumps" happen and
       how far to jump (either an index or a step-size)
 
 ## Misc
+
+Concurrency dealing w/ shared mutable data: "tags" for indicating that
+mutations have occurred, use these "tags" to indicate when operationsmay be
+scheduled (i.e. to indicate dependencies between mutations)
+
+When a method returns a reference to an internal value, `mut`ness should be
+preserved based on the receiver. I.e., the language itself should somehow
+obviate the need for things like `index[]` and `index_mut[]` being implemented
+separately. This means that there needs to be a way to denote a
+"possibly-`mut`" receiver and "forward" the mutability through the method and
+onto the return type.
+ * Option 1, less general: keyword meaning "`mut` IFF receiver is `mut`"
+ * Option 2, more general: way of "naming" the CV-qualification (to use a C++
+   term) of input paramters
 
 Compile-time evaluation (C++ `constexpr`) should be syntactically/semantically
 linked with the concept of `static` data; the idea is that *the result of a
