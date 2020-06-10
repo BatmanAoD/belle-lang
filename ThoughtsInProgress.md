@@ -135,11 +135,31 @@ Support something like C++ scoped enums, but:
       zipped pair of arrays (or similar) representing where "jumps" happen and
       how far to jump (either an index or a step-size)
 
+## "Unique" values
+
+"Move" semantics, but only on non-shared values; object itself may be owned by
+the runtime or be a value (stack) type
+
+Unique values can turn into shared values, but not vice-versa
+
+Some methods may require a unique value!
+
+Relationship to mutability? (Rust: `mut` really means "uniquely referenced",
+but I think this is separate from the value itself being "unique")
+
+`drop`/`destructor`/`finalizer`: types with destructors can _only_ exist as
+"unique" values. I.e., these values cannot be turned into shared values.
+
 ## Misc
 
 Concurrency dealing w/ shared mutable data: "tags" for indicating that
-mutations have occurred, use these "tags" to indicate when operationsmay be
+mutations have occurred, use these "tags" to indicate when operations may be
 scheduled (i.e. to indicate dependencies between mutations)
+
+Error handling in finalizers/destructors: is this possible?  Require
+destructors to be infallible? Provide special syntax for what to do when a
+destructor error occurs within some scope? Implicitly capture destructor errors
+and require a caller at some level on the stack to handle them?
 
 When a method returns a reference to an internal value, `mut`ness should be
 preserved based on the receiver. I.e., the language itself should somehow
@@ -180,8 +200,6 @@ generalized to longer-lived resources, whereas RAII is *very*
 extensible/scalable/generalizable.
 
 Way of passing method names, a la Ruby symbols? (Compile-time only)
-
-“message-oriented”--consider how to make this “truly” OO a la Alan Kays
 
 Way to support marshalling/unmarshalling of *classes* (not just objects)? This
 would make software updates possible without recompiling *or* relinking, but
