@@ -1,0 +1,37 @@
+// Non-newline whitespace is not meaningful (TODO: other Unicode whitespace?)
+WHITESPACE = _{ " " | "\t" }
+// C and C++ style comments
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
+
+// Top-level elements: class, function
+Program = _{ SOI ~ (Class | Function)+ ~ EOI }
+
+// general identifiers are like those in most languages, except `_` is only
+// permitted as a 'separator' character
+Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
+
+// TODO: generics
+Class = { ClassDecl ~ "{" ~ ( "}" | NEWLINE ~ ClassItem* ~ "}" ) ~ NEWLINE }
+// The space between the `#` and the class name is mandatory
+ClassDecl = @{ "# " ~ ClassName ~ (WHITESPACE+ | NEWLINE) }
+// Class names must start with an uppercase letter
+ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC }
+ClassItem = { ClassData } // XXX TEMP | ClassRequests | ClassAux | ClassMethods }
+
+ClassData = { DataDecl ~ DataMember+ }
+DataDecl = @{ "## data" ~ NEWLINE }
+DataMember = { Ident ~ ":" ~ TypeName ~ NEWLINE }
+
+// TODO: generics, handlers
+TypeName = { Unique? ~ (Array | ClassName | Builtin) }
+Unique = { "~" }
+Array = { Slice | SizedArray }
+Slice = { "[" ~ TypeName ~ "]" }
+SizedArray = { "[" ~ TypeName ~ "#" ~ WholeNumber ~ "]" }
+// TODO: more
+Builtin = { "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" |"u64" | "f32" | "f64" | "char32" | "String" }
+
+WholeNumber = @{ "0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
+
+// XXX TEMP
+Function = { "XXX come up with function def" }
