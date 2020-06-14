@@ -12,7 +12,7 @@
 
 [] access, as usual…
 ..way to get “raw pointer” from array?
-...allow ptr artihmetic?
+...allow ptr arithmetic?
 array.method, e.g. for reduce op
 (way to specify whether op is commutative/associative for parallelization/optimization)
 
