@@ -4,18 +4,20 @@ WHITESPACE = _{ " " | "\t" }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
 
 // Top-level elements: class, function
-Program = _{ SOI ~ (Class | Function)+ ~ EOI }
+// Atomic because elements must start on column 0
+Program = ${ SOI ~ ((Class | Function) ~ NEWLINE* )+ ~ EOI }
 
 // general identifiers are like those in most languages, except `_` is only
 // permitted as a 'separator' character
 Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
 
 // TODO: generics
-Class = { ClassDecl ~ "{" ~ ( "}" | NEWLINE ~ ClassItem* ~ "}" ) ~ NEWLINE }
+Class = ${ ClassDecl ~ ClassBody }
+ClassBody = { "{" ~ ( "}" | NEWLINE ~ ClassItem* ~ "}" ) ~ NEWLINE }
 // The space between the `#` and the class name is mandatory
-// TODO: does this ensure that the line starts with `#`?
-ClassDecl = @{ "# " ~ ClassName ~ (WHITESPACE+ | NEWLINE) }
-// Class names must start with an uppercase letter
+ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | NEWLINE) }
+// Class names must start with an uppercase letter and cannot contain
+// underscores (TODO: permit underscores?)
 ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
 ClassItem = { ClassData } // XXX TEMP | ClassRequests | ClassAux | ClassMethods }
 
@@ -36,4 +38,4 @@ Builtin = { "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" |"u64" | "f32" |
 WholeNumber = @{ "0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
 
 // XXX TEMP
-Function = { "XXX come up with function def" }
+Function = @{ "XXX come up with function def" }
