@@ -13,12 +13,14 @@ Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
 // TODO: generics
 Class = { ClassDecl ~ "{" ~ ( "}" | NEWLINE ~ ClassItem* ~ "}" ) ~ NEWLINE }
 // The space between the `#` and the class name is mandatory
+// TODO: does this ensure that the line starts with `#`?
 ClassDecl = @{ "# " ~ ClassName ~ (WHITESPACE+ | NEWLINE) }
 // Class names must start with an uppercase letter
-ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC }
+ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
 ClassItem = { ClassData } // XXX TEMP | ClassRequests | ClassAux | ClassMethods }
 
 ClassData = { DataDecl ~ DataMember+ }
+// TODO: permit indent? *require* indent?
 DataDecl = @{ "## data" ~ NEWLINE }
 DataMember = { Ident ~ ":" ~ TypeName ~ NEWLINE }
 

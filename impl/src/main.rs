@@ -6,6 +6,9 @@ use pest_derive::Parser;
 struct BelleParser;
 
 fn main() {
-    let successful_parse = BelleParser::parse(Rule::Program, "# IntVector {}\n");
-    println!("{:?}", successful_parse);
+    let parse_result = BelleParser::parse(
+        Rule::Program,
+        "# IntVector {}\n",
+    );
+    println!("{:#?}", parse_result);
 }
