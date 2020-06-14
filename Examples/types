@@ -1,7 +1,6 @@
-type Foo {
-}
+# Foo {}
 
-type Bar Foo
+# Bar <somthing here> Foo // ???
 
 fn (Foo).data() -> i32 {
     // ... 

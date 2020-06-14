@@ -3,10 +3,10 @@
 // merely an exercise.
 // This uses a "linked list of buffers" strategy.
 
-#IntVector
+# IntVector
 {
 // XXX arguably the concept of "nested classes" is of questionable utility.
-  #Node
+  # Node
   {
     // The data members. All are "private" by default.
     ##data

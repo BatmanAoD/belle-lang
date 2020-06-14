@@ -168,7 +168,7 @@ separately. This means that there needs to be a way to denote a
 "possibly-`mut`" receiver and "forward" the mutability through the method and
 onto the return type.
  * Option 1, less general: keyword meaning "`mut` IFF receiver is `mut`"
- * Option 2, more general: way of "naming" the CV-qualification (to use a C++
+ * Option 2, more general: way of "naming" the CV-qualifications (to use a C++
    term) of input paramters
 
 Compile-time evaluation (C++ `constexpr`) should be syntactically/semantically
