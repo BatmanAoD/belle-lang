@@ -1,11 +1,19 @@
+// XXX handling "trivia" is quite difficult with the current version of Pest.
+// There are plans to improve the language:
+// https://github.com/pest-parser/pest/issues/333
+
 // Non-newline whitespace is not meaningful (TODO: other Unicode whitespace?)
 WHITESPACE = _{ " " | "\t" }
-// C and C++ style comments
-COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" | "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
+// Block style comments
+COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
+// Single-line comments
+COMMENT_SINGLE = @{ "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
+// Using newlines to terminate/separate items
+EOL = _{ (COMMENT_SINGLE | NEWLINE)+ }
 
 // Top-level elements: class, function
 // Atomic because elements must start on column 0
-Program = ${ SOI ~ ((Class | Function) ~ NEWLINE* )+ ~ EOI }
+Program = ${ SOI ~ ((Class | Function) ~ EOL* )+ ~ EOI }
 
 // general identifiers are like those in most languages, except `_` is only
 // permitted as a 'separator' character
@@ -13,18 +21,26 @@ Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
 
 // TODO: generics
 Class = ${ ClassDecl ~ ClassBody }
-ClassBody = { "{" ~ ( "}" | NEWLINE ~ ClassItem* ~ "}" ) ~ NEWLINE }
+ClassBody = { "{" ~ ( "}" | EOL ~ ClassItem* ~ "}" ) ~ EOL }
 // The space between the `#` and the class name is mandatory
-ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | NEWLINE) }
+ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) }
 // Class names must start with an uppercase letter and cannot contain
 // underscores (TODO: permit underscores?)
 ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-ClassItem = { ClassData } // XXX TEMP | ClassRequests | ClassAux | ClassMethods }
+ClassItem = { ClassData | ClassRequests } // | ClassMethods | ClassAux }
 
 ClassData = { DataDecl ~ DataMember+ }
 // TODO: permit indent? *require* indent?
-DataDecl = @{ "## data" ~ NEWLINE }
-DataMember = { Ident ~ ":" ~ TypeName ~ NEWLINE }
+DataDecl = @{ "## data" ~ EOL }
+DataMember = { Ident ~ ":" ~ TypeName ~ EOL+ }
+
+ClassRequests = { RequestDecl ~ Request+ }
+RequestDecl = @{ "## requests" ~ EOL }
+Request = { Ident ~ RequestArgs? ~ "->" ~ RequestReturn ~ RequestBody? ~ EOL+ }
+RequestArgs = { "(" ~ "XXX TODO" ~ ")" }
+RequestReturn = { TypeName }
+// XXX newlines...?
+RequestBody = { "{" ~ "XXX TODO" ~ "}" }
 
 // TODO: generics, handlers
 TypeName = { Unique? ~ (Array | ClassName | Builtin) }
