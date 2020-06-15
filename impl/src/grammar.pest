@@ -7,7 +7,10 @@ WHITESPACE = _{ " " | "\t" }
 // Block style comments
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 // Single-line comments
-COMMENT_SINGLE = @{ "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
+COMMENT_SINGLE = _{ TRIVIA? ~ "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
+// XXX why does this need to be excplicit to make `COMMENT_SINGLE` accept
+// trivia?
+TRIVIA = _{ (WHITESPACE | COMMENT)+ }
 // Using newlines to terminate/separate items
 EOL = _{ (COMMENT_SINGLE | NEWLINE)+ }
 
@@ -21,7 +24,7 @@ Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
 
 // TODO: generics
 Class = ${ ClassDecl ~ ClassBody }
-ClassBody = { "{" ~ ( "}" | EOL ~ ClassItem* ~ "}" ) ~ EOL }
+ClassBody = { "{" ~ ( "}" | EOL ~ ClassItem* ~ "}" ) }
 // The space between the `#` and the class name is mandatory
 ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) }
 // Class names must start with an uppercase letter and cannot contain
@@ -29,14 +32,14 @@ ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) }
 ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
 ClassItem = { ClassData | ClassRequests } // | ClassMethods | ClassAux }
 
-ClassData = { DataDecl ~ DataMember+ }
+ClassData = { DataDecl ~ (DataMember ~ EOL)+ }
 // TODO: permit indent? *require* indent?
 DataDecl = @{ "## data" ~ EOL }
-DataMember = { Ident ~ ":" ~ TypeName ~ EOL+ }
+DataMember = { Ident ~ ":" ~ TypeName }
 
-ClassRequests = { RequestDecl ~ Request+ }
+ClassRequests = { RequestDecl ~ (Request ~ EOL)+ }
 RequestDecl = @{ "## requests" ~ EOL }
-Request = { Ident ~ RequestArgs? ~ "->" ~ RequestReturn ~ RequestBody? ~ EOL+ }
+Request = { Ident ~ RequestArgs? ~ "->" ~ RequestReturn ~ RequestBody? }
 RequestArgs = { "(" ~ "XXX TODO" ~ ")" }
 RequestReturn = { TypeName }
 // XXX newlines...?

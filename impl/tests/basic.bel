@@ -1,1 +1,7 @@
-# IntVector {} // foo bar baz
+# IntVector {}
+
+// foo bar
+
+      /* foo bar */    // foo bar           
+
+

@@ -1,5 +1,3 @@
-use std::fs::read_to_string;
-
 pub use pest::Parser;
 
 use belle::*;   // XXX TEMP
@@ -9,11 +7,7 @@ fn parse_str(prog: &str) {
     println!("{:#?}", result);
 }
 
-fn parse_file(path: &str) {
-    parse_str(&read_to_string(path).unwrap());
-}
-
 #[test]
 fn basic() {
-    parse_file("./basic.bel")
+    parse_str(include_str!("./basic.bel"))
 }
