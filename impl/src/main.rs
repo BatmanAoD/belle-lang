@@ -1,9 +1,4 @@
-use pest::Parser;
-use pest_derive::Parser;
-
-#[derive(Parser)]
-#[grammar = "grammar.pest"]
-struct BelleParser;
+use belle::{BelleParser, Parser, Rule};
 
 fn main() {
     let parse_result = BelleParser::parse(
