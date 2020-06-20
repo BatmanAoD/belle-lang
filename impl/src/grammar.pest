@@ -1,6 +1,7 @@
-// XXX handling "trivia" is quite difficult with the current version of Pest.
+// TODO handling "trivia" is quite difficult with the current version of Pest.
 // There are plans to improve the language:
 // https://github.com/pest-parser/pest/issues/333
+// Consider helping improve Pest or switching to Antlr.
 
 // Non-newline whitespace is not meaningful (TODO: other Unicode whitespace?)
 WHITESPACE = _{ " " | "\t" }
@@ -16,11 +17,19 @@ EOL = _{ (COMMENT_SINGLE | NEWLINE)+ }
 
 // Top-level elements: class, function
 // Atomic because elements must start on column 0
+// TODO: `pub`
 Program = ${ SOI ~ ((Class | Function) ~ EOL* )+ ~ EOI }
 
 // general identifiers are like those in most languages, except `_` is only
 // permitted as a 'separator' character
 Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
+
+// TODO make indentation more flexible
+Indentation = { "  " }
+
+TypedVar = { Ident ~ ":" ~ TypeName }
+PossiblyInferred = { TypedVar | Ident }
+ParametersList = { "(" ~ (PossiblyInferred  ~ ("," ~ PossiblyInferred)* ~ ",")? ~ ")" }
 
 // TODO: generics
 Class = ${ ClassDecl ~ ClassBody }
@@ -30,31 +39,39 @@ ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) }
 // Class names must start with an uppercase letter and cannot contain
 // underscores (TODO: permit underscores?)
 ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-ClassItem = { ClassData | ClassRequests } // | ClassMethods | ClassAux }
+// TODO: Why is trivia not permitted by `ClassItem`?
+ClassItem = { ClassData | ClassRequests } // TODO permit declaring methods in body? | ClassMethods | ClassAux }
 
 ClassData = { DataDecl ~ (DataMember ~ EOL)+ }
-// TODO: permit indent? *require* indent?
-DataDecl = @{ "## data" ~ EOL }
-DataMember = { Ident ~ ":" ~ TypeName }
+// TODO: optional indentation?
+DataDecl = @{ Indentation ~ "## data" ~ EOL }
+DataMember = { Indentation{2} ~ TypedVar }
 
 ClassRequests = { RequestDecl ~ (Request ~ EOL)+ }
-RequestDecl = @{ "## requests" ~ EOL }
-Request = { Ident ~ RequestArgs? ~ "->" ~ RequestReturn ~ RequestBody? }
-RequestArgs = { "(" ~ "XXX TODO" ~ ")" }
-RequestReturn = { TypeName }
-// XXX newlines...?
-RequestBody = { "{" ~ "XXX TODO" ~ "}" }
+RequestDecl = @{ Indentation ~ "## requests" ~ EOL }
+Request = { Indentation{2} ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock? }
 
 // TODO: generics, handlers
-TypeName = { Unique? ~ (Array | ClassName | Builtin) }
+TypeName = { Qualified? ~ (Array | ClassName | Builtin) }
+// `~` implies `mut`
+Qualified = { Unique | Mut }
 Unique = { "~" }
+Mut = { "mut" }
 Array = { Slice | SizedArray }
 Slice = { "[" ~ TypeName ~ "]" }
-SizedArray = { "[" ~ TypeName ~ "#" ~ WholeNumber ~ "]" }
+SizedArray = { "[" ~ TypeName ~ "#" ~ NaturalNumber ~ "]" }
 // TODO: more
-Builtin = { "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" |"u64" | "f32" | "f64" | "char32" | "String" }
+Builtin = { "isize" | "usize" | "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" |"u64" | "f32" | "f64" | "char32" | "String" }
 
-WholeNumber = @{ "0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
+NaturalNumber = @{ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
 
-// XXX TEMP
-Function = @{ "XXX come up with function def" }
+// As in Go, methods are functions with a receiver declared before the function name
+Function = { "fn" ~ Receiver? ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock }
+Receiver = { "(" ~ QualifiedSelf ~ ")" }
+// Unlike Go, the receiver is always named `self`. Unlike Rust, the type of the
+// receiver is declared (since methods are not declared in an `impl` block),
+// but the word `self` is not.
+// TODO should it be possible to declare methods for arrays and/or builtins?
+QualifiedSelf = { Qualified? ~ ClassName }
+
+CodeBlock = { EOL? ~ "{" ~ EOL? ~ "XXX TODO" ~ "}" }

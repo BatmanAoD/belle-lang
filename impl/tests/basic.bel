@@ -1,7 +1,15 @@
-# IntVector {}
+# IntVector {
+  ## data
+    a: [i32]
+  ## requests
+    size -> usize
+}
 
 // foo bar
 
       /* foo bar */    // foo bar           
 
 
+fn (~IntVector) {
+    XXX TODO
+}
