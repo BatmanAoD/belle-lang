@@ -74,7 +74,7 @@ Receiver = !{ "(" ~ QualifiedSelf ~ ")" }
 // TODO should it be possible to declare methods for arrays and/or builtins?
 QualifiedSelf = !{ Qualified? ~ ClassName }
 
-CodeBlock = !{ EOL? ~ "{" ~ EOL? ~ "XXX TODO" ~ "}" }
+CodeBlock = !{ EOL? ~ "{" ~ EOL? ~ "XXX TODO" ~ EOL ~ "}" }
 
 // Loops: `for` (as foreach) and `while` (no C-style `for`)
 // Conditionals: `if` and `match`
