@@ -10,6 +10,6 @@
       /* foo bar */    // foo bar           
 
 
-fn (~IntVector) {
+fn (~IntVector) takeUniq {
     XXX TODO
 }
