@@ -18,63 +18,63 @@ EOL = _{ (COMMENT_SINGLE | NEWLINE)+ }
 // Top-level elements: class, function
 // Atomic because elements must start on column 0
 // TODO: `pub`
-Program = ${ SOI ~ ((Class | Function) ~ EOL* )+ ~ EOI }
+Program = ${ SOI ~ ((Class | Function) ~ EOL* )+ ~ EOI } // XXX $
 
 // general identifiers are like those in most languages, except `_` is only
 // permitted as a 'separator' character
-Ident = { ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
+Ident = @{ ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
 
 // TODO make indentation more flexible
-Indentation = { "  " }
+// Indentation = !{ "  " }
 
-TypedVar = { Ident ~ ":" ~ TypeName }
-PossiblyInferred = { TypedVar | Ident }
-ParametersList = { "(" ~ (PossiblyInferred  ~ ("," ~ PossiblyInferred)* ~ ",")? ~ ")" }
+TypedVar = !{ Ident ~ ":" ~ TypeName }
+PossiblyInferred = !{ TypedVar | Ident }
+ParametersList = !{ "(" ~ (PossiblyInferred  ~ ("," ~ PossiblyInferred)* ~ ",")? ~ ")" }
 
 // TODO: generics
-Class = ${ ClassDecl ~ ClassBody }
-ClassBody = { "{" ~ ( "}" | EOL ~ ClassItem* ~ "}" ) }
+Class = ${ ClassDecl ~ ClassBody }   // XXX $
+ClassBody = !{ "{" ~ ( "}" | EOL ~ ClassItem* ~ "}" ) }
 // The space between the `#` and the class name is mandatory
-ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) }
+ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) } // XXX $
 // Class names must start with an uppercase letter and cannot contain
 // underscores (TODO: permit underscores?)
 ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
 // TODO: Why is trivia not permitted by `ClassItem`?
-ClassItem = { ClassData | ClassRequests } // TODO permit declaring methods in body? | ClassMethods | ClassAux }
+ClassItem = !{ ClassData | ClassRequests } // TODO permit declaring methods in body? | ClassMethods | ClassAux }
 
-ClassData = { DataDecl ~ (DataMember ~ EOL)+ }
+ClassData = !{ DataDecl ~ (DataMember ~ EOL)+ }
 // TODO: optional indentation?
-DataDecl = @{ Indentation ~ "## data" ~ EOL }
-DataMember = { Indentation{2} ~ TypedVar }
+DataDecl = { WHITESPACE* ~ "## data" ~ EOL }   // XXX should be atomic, w/ indentation
+DataMember = !{ TypedVar }
 
-ClassRequests = { RequestDecl ~ (Request ~ EOL)+ }
-RequestDecl = @{ Indentation ~ "## requests" ~ EOL }
-Request = { Indentation{2} ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock? }
+ClassRequests = !{ RequestDecl ~ (Request ~ EOL)+ }
+RequestDecl = { WHITESPACE* ~ "## requests" ~ EOL }   // XXX should be atomic
+Request = !{ WHITESPACE* ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock? }
 
 // TODO: generics, handlers
-TypeName = { Qualified? ~ (Array | ClassName | Builtin) }
+TypeName = !{ Qualified? ~ (Array | ClassName | Builtin) }
 // `~` implies `mut`
-Qualified = { Unique | Mut }
-Unique = { "~" }
-Mut = { "mut" }
-Array = { Slice | SizedArray }
-Slice = { "[" ~ TypeName ~ "]" }
-SizedArray = { "[" ~ TypeName ~ "#" ~ NaturalNumber ~ "]" }
+Qualified = !{ UNIQUE | MUT }
+UNIQUE = !{ "~" }
+MUT = !{ "mut" }
+Array = !{ Slice | SizedArray }
+Slice = !{ "[" ~ TypeName ~ "]" }
+SizedArray = !{ "[" ~ TypeName ~ "#" ~ NaturalNumber ~ "]" }
 // TODO: more
-Builtin = { "isize" | "usize" | "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" |"u64" | "f32" | "f64" | "char32" | "String" }
+Builtin = @{ "isize" | "usize" | "i8" | "u8" | "i16" | "u16" | "i32" | "u32" | "i64" |"u64" | "f32" | "f64" | "char32" | "String" }
 
 NaturalNumber = @{ ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
 
 // As in Go, methods are functions with a receiver declared before the function name
-Function = { "fn" ~ Receiver? ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock }
-Receiver = { "(" ~ QualifiedSelf ~ ")" }
+Function = !{ "fn" ~ Receiver? ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock }
+Receiver = !{ "(" ~ QualifiedSelf ~ ")" }
 // Unlike Go, the receiver is always named `self`. Unlike Rust, the type of the
 // receiver is declared (since methods are not declared in an `impl` block),
 // but the word `self` is not.
 // TODO should it be possible to declare methods for arrays and/or builtins?
-QualifiedSelf = { Qualified? ~ ClassName }
+QualifiedSelf = !{ Qualified? ~ ClassName }
 
-CodeBlock = { EOL? ~ "{" ~ EOL? ~ "XXX TODO" ~ "}" }
+CodeBlock = !{ EOL? ~ "{" ~ EOL? ~ "XXX TODO" ~ "}" }
 
 // Loops: `for` (as foreach) and `while` (no C-style `for`)
 // Conditionals: `if` and `match`
