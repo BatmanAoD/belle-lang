@@ -9,8 +9,7 @@ WHITESPACE = _{ " " | "\t" }
 COMMENT = _{ "/*" ~ (!"*/" ~ ANY)* ~ "*/" }
 // Single-line comments
 COMMENT_SINGLE = _{ TRIVIA? ~ "//" ~ (!NEWLINE ~ ANY) * ~ NEWLINE }
-// XXX why does this need to be excplicit to make `COMMENT_SINGLE` accept
-// trivia?
+// Explicit b/c `COMMENT_SINGLE` can't be made explicitly-non-atomic (sigh)
 TRIVIA = _{ (WHITESPACE | COMMENT)+ }
 // Using newlines to terminate/separate items
 EOL = _{ (COMMENT_SINGLE | NEWLINE)+ }
@@ -18,38 +17,40 @@ EOL = _{ (COMMENT_SINGLE | NEWLINE)+ }
 // Top-level elements: class, function
 // Atomic because elements must start on column 0
 // TODO: `pub`
-Program = ${ SOI ~ ((Class | Function) ~ EOL* )+ ~ EOI } // XXX $
+Program = ${ SOI ~ ((Class | Function) ~ EOL* )+ ~ EOI }
 
 // general identifiers are like those in most languages, except `_` is only
 // permitted as a 'separator' character
 Ident = @{ ASCII_ALPHA ~ ( ASCII_ALPHANUMERIC | "_"  ~ &ASCII_ALPHANUMERIC )* }
 
-// TODO make indentation more flexible
-// Indentation = !{ "  " }
+// TODO make indentation more flexible; use pop/push
+Indentation = !{ "  " }
 
-TypedVar = !{ Ident ~ ":" ~ TypeName }
+// XXX this is explicitly non-atomic, so why is explicit `TRIVIA?` necessary here?
+TypedVar = !{ TRIVIA? ~ Ident ~ ":" ~ TypeName }
 PossiblyInferred = !{ TypedVar | Ident }
 ParametersList = !{ "(" ~ (PossiblyInferred  ~ ("," ~ PossiblyInferred)* ~ ",")? ~ ")" }
 
 // TODO: generics
-Class = ${ ClassDecl ~ ClassBody }   // XXX $
-ClassBody = !{ "{" ~ ( "}" | EOL ~ ClassItem* ~ "}" ) }
+Class = ${ ClassDecl ~ ClassBody }
+ClassBody = { "{" ~ InnerClassBody }
+// Separate from `ClassBody` b/c of meaningful whitespace
+InnerClassBody = ${ ( "}" | EOL ~ ClassItem* ~ "}" ) }
 // The space between the `#` and the class name is mandatory
-ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) } // XXX $
+ClassDecl = ${ "# " ~ ClassName ~ (WHITESPACE+ | EOL) }
 // Class names must start with an uppercase letter and cannot contain
 // underscores (TODO: permit underscores?)
 ClassName = @{ ASCII_ALPHA_UPPER ~ ASCII_ALPHANUMERIC* }
-// TODO: Why is trivia not permitted by `ClassItem`?
-ClassItem = !{ ClassData | ClassRequests } // TODO permit declaring methods in body? | ClassMethods | ClassAux }
+ClassItem = ${ ClassData | ClassRequests } // TODO permit declaring methods in body? | ClassMethods | ClassAux }
 
-ClassData = !{ DataDecl ~ (DataMember ~ EOL)+ }
+ClassData = ${ DataDecl ~ (DataMember ~ EOL)+ }
 // TODO: optional indentation?
-DataDecl = { WHITESPACE* ~ "## data" ~ EOL }   // XXX should be atomic, w/ indentation
+DataDecl = @{ Indentation ~ "## data" ~ EOL }
 DataMember = !{ TypedVar }
 
 ClassRequests = !{ RequestDecl ~ (Request ~ EOL)+ }
-RequestDecl = { WHITESPACE* ~ "## requests" ~ EOL }   // XXX should be atomic
-Request = !{ WHITESPACE* ~ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock? }
+RequestDecl = @{ Indentation ~ "## requests" ~ EOL }
+Request = !{ Ident ~ ParametersList? ~ ("->" ~ TypeName)? ~ CodeBlock? }
 
 // TODO: generics, handlers
 TypeName = !{ Qualified? ~ (Array | ClassName | Builtin) }
