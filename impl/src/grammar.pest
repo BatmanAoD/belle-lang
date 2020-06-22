@@ -75,3 +75,6 @@ Receiver = { "(" ~ QualifiedSelf ~ ")" }
 QualifiedSelf = { Qualified? ~ ClassName }
 
 CodeBlock = { EOL? ~ "{" ~ EOL? ~ "XXX TODO" ~ "}" }
+
+// Loops: `for` (as foreach) and `while` (no C-style `for`)
+// Conditionals: `if` and `match`

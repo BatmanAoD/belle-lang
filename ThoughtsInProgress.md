@@ -91,6 +91,14 @@ to determine all qualifiers (e.g. C++'s `const`). (Runtime-)polymorphic types,
 however, represent an *interface*, and therefore it makes sense to add
 qualifiers.
 
+## Anonymous types
+
+Useful with RAII; replaces "defer"
+
+Akin to `with`
+
+Are JS's objects essentially anonymous classes?
+
 ## "Mixins"
 
 A la Ruby--separates the idea of *added functionality via inheritance* from the

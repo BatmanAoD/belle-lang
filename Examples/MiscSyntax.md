@@ -1,3 +1,38 @@
+## Variable declaration/initialization
+
+Predeclaration (compiler must statically check that var is initialized before
+use, a la Rust):
+
+```
+val: type
+```
+
+`:=` is only for creating _new_ values; this is useable for variables _and_ for
+maps where the key is not yet in the map.
+
+`=` is only for variable or member reassignment.
+
+## Operators
+
+```
+op (<type>) <punct> (<type>) -> <type> : sym, com, assoc, ... { ... }
+```
+
+Inside of function, left-hand side and right-hand side are called `lhs`, `rhs`,
+respectively (no names b/c overloading on names is *not* permitted for
+operators)
+
+`: ...` is optional; it behaves as follows:
+
+* sym: types can be reversed (i.e. `T * S` and `S * T` should invoke the same
+  function)
+* com, assoc, refl: compiler statically checks that operation meets
+  commutative, associative, and/or reflexive axioms, as specified
+* id(val): compiler should statically check that `val` is the identity for this
+  operator
+* inv(op), dist(op): this is inverse of `op`, or this distributes over `op` (is
+  this statically verifiable?)
+
 ## Pointers and ownership
 
 `*, &, $` for pointer ownership:
