@@ -31,6 +31,7 @@ that I have.
    * Built-in marshalling of *executable* code? This would be difficult or impossible
      in a multi-architecture system without JIT, which is probably contrary to low-level
      control goal
+   * "Interactive" way to take a slow/dynamic program and incrementally monomorphize/optimize it?
  * Guarantees about functionality of debug vs release builds (may inhibit optimizations,
    but that might be a good thing)
    * Perhaps there would be an "intermediate" optimization level between debug and release
