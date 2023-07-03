@@ -13,14 +13,21 @@ address).
 
 # Some implications & extrapolations
 
-* Contexts only provide "capabilities", which are effectively "handles" to
-  actors that provide particular functionality.
+* Contexts only provide "handles" to actors that provide particular
+  functionality; the functionality provided is a "capability".
+* Just like service-registration in a dependency-injection framework, a
+  "capability" is an interface that must be unique within a given context. That
+  is, a given context must be configured with at most *one* "handle" for each
+  "capability."
 * Contexts are immutable. To change an actor's context, a new instantiation
   must occur. In general, the interfaces provided via capabilities should also
   be...limited. "Immutable" is probably not necessarily the right term here.
-  * ...would it be possible to build an effects system around contexts?
+  * Note that methods could also promise to limit which capabilities will be
+    used. This is somewhat similar to an effect system, though it would lose
+    any guarantees when any other (non-capability) actor is messaged.
 * Some "standard" capabilities (context items) are provided by the runtime/OS:
-  `stdout`, `stdin`, various clocks
+  the default allocator, `stdout`, `stdin`, synchronization primitives (?),
+  various clocks
 * Instantiating an actor should always take optional arguments for overriding
   the defaults for context values.
   * These should probably *not* be limited by the set of capabilities actually
