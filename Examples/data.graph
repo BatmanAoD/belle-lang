@@ -64,6 +64,9 @@ flow Main {
         // before this `split` block?
         t -> join &Task
     }
+    // Declare non-default contexts (`io::stream` has no default)
+    ErrorAggregator with (io::stderr);
+    SuccessAggregator with (io::stdio);
     // matches on each element in the stream
     Connector.clients -> match {
         Error -> ErrorAggregator.collect
@@ -75,5 +78,36 @@ flow Main {
     Runner.result -> match {
         Error -> ErrorAggregator.collect
         Output -> SuccessAggregator.collect
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Trying to be more graphical...
+
+// names without sigils declare actors, which are somewhat "persistent" and
+// must have `source`/`sink` functions
+// names with `$` declare runners, which handle a single async task using a
+// `run` function.
+// names with `&` are in-place combinators
+// data types must be namespaced
+
+flow Main {
+    TaskMaker{os::args, os::fs[read]}: descr: Descriptor, t: source(Task);
+    Connector;
+
+    TaskMaker -> split {
+            descr -> Connector,
+            t -> &Task,
+    }
+    ErrorAggregator{io::stderr as io::stream[write]};
+    Connector -> match {
+        client::Client -> &Task,
+        Error -> ErrorAggregator
+    }
+    &Task -> $Runner
+    SuccessAggregator{io::stdout as io::stream[write]};
+    $Runner -> match {
+        Output -> SuccessAggregator
+        Error -> ErrorAggregator
     }
 }
