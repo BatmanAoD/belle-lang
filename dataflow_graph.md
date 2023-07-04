@@ -11,6 +11,7 @@ functions.
 # Notes on the graphical model
 
 * Fully monomorphized types only
+  * Possibly POD only, at least for cross-node communication?
 * Full textual representation
 * "Actor-model" annotations; graphically, perhaps computational nodes (actors
   or even specific nodes in a distributed network) can be depicted as outlines

@@ -1,0 +1,79 @@
+use client::{Descriptor, Client};
+use message::Message;
+use task::{Task, Output, Error};
+
+// `sink` and `source` are always "typed stream" APIs
+// They can have the same name
+
+actor Connector {
+    sink:
+        clients(Descriptor)
+    source:
+        clients(Client|Error)
+}
+
+// `init` is a constructor for the actor
+// `final` is just a non-stream `async` function: it returns a single item
+
+actor Runner {
+    init:
+        // `source` and `sink` can be part of the element-type for streams
+        // TODO: it would be simpler to require data-collections rather than
+        // async iterators (i.e. instead of `source(Task)` it would be
+        // something like `[Task]`)
+        client(Client, source(Task))
+    final:
+        result(Output|Error)
+}
+
+// `context` is for dependency injection / capabilities / etc
+
+actor TaskMaker {
+    context {
+        // requires input CLI args and filesystem access
+        // (not sure what a good syntax is for the "effect" here...)
+        os::args, os::fs[read],
+    }
+    source:
+        tasks(descr: Descriptor, t: source(Task))
+}
+
+actor SuccessAggregator {
+    context {
+        // requires some kind of output stream (stdout, a filehandle, etc)
+        io::stream[write],
+    }
+    sink:
+        collect(Output)
+}
+
+actor ErrorAggregator {
+    context {
+        io::stream[write],
+    }
+    sink:
+        collect(Error)
+}
+
+flow Main {
+    TaskMaker.tasks -> split {
+        descr -> Connector.clients
+        // `&` is syntax for "inline" stream-combinator "nodes"
+        // TODO: how does the syntax indicate that elements in the new `Task`
+        // stream are associated with each other by how they were associated
+        // before this `split` block?
+        t -> join &Task
+    }
+    // matches on each element in the stream
+    Connector.clients -> match {
+        Error -> ErrorAggregator.collect
+        Client -> &Task
+    }
+    // when streaming to an `init` method, each item instantiates an instance
+    // of the actor
+    &Task -> Runner.init
+    Runner.result -> match {
+        Error -> ErrorAggregator.collect
+        Output -> SuccessAggregator.collect
+    }
+}
