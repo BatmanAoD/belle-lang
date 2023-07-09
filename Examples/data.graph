@@ -1,0 +1,141 @@
+use client::{Descriptor, Client};
+use message::Message;
+use task::{Task, Output, Error};
+
+// `sink` and `source` are always "typed stream" APIs
+// They can have the same name
+
+actor Connector {
+    sink:
+        clients(Descriptor)
+    source:
+        clients(Client|Error)
+}
+
+// `init` is a constructor for the actor
+// `final` is just a non-stream `async` function: it returns a single item
+
+actor Runner {
+    init:
+        // `source` and `sink` can be part of the element-type for streams
+        // TODO: it would be simpler to require data-collections rather than
+        // async iterators (i.e. instead of `source(Task)` it would be
+        // something like `[Task]`)
+        client(Client, source(Task))
+    final:
+        result(Output|Error)
+}
+
+// `context` is for dependency injection / capabilities / etc
+
+actor TaskMaker {
+    context {
+        // requires input CLI args and filesystem access
+        // (not sure what a good syntax is for the "effect" here...)
+        os::args, os::fs[read],
+    }
+    source:
+        tasks(descr: Descriptor, t: source(Task))
+}
+
+actor SuccessAggregator {
+    context {
+        // requires some kind of output stream (stdout, a filehandle, etc)
+        io::stream[write],
+    }
+    sink:
+        collect(Output)
+}
+
+actor ErrorAggregator {
+    context {
+        io::stream[write],
+    }
+    sink:
+        collect(Error)
+}
+
+flow Main {
+    TaskMaker.tasks -> split {
+        descr -> Connector.clients
+        // `&` is syntax for "inline" stream-combinator "nodes"
+        // TODO: how does the syntax indicate that elements in the new `Task`
+        // stream are associated with each other by how they were associated
+        // before this `split` block?
+        t -> join &ClientTasks
+    }
+    // Declare non-default contexts (`io::stream` has no default)
+    ErrorAggregator with (io::stderr);
+    SuccessAggregator with (io::stdio);
+    // matches on each element in the stream
+    Connector.clients -> match {
+        Error -> ErrorAggregator.collect
+        Client -> &ClientTasks
+    }
+    // when streaming to an `init` method, each item instantiates an instance
+    // of the actor
+    &ClientTasks -> Runner.init
+    Runner.result -> match {
+        Error -> ErrorAggregator.collect
+        Output -> SuccessAggregator.collect
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Trying to be more graphical...
+
+// names without sigils declare actors, which are somewhat "persistent" and
+// must have `source`/`sink` functions
+// names with `$` declare runners, which handle a single async task using a
+// `run` function.
+// names with `&` are in-place combinators
+// data types must be namespaced
+
+flow Main {
+    // `: =>` indicates that this is only a source, not a sink
+    TaskMaker{os::args, os::fs[read]}: => descr: Descriptor, t: source(Task);
+    Connector: Descriptor => Client | Error;
+
+    TaskMaker -> split {
+            descr -> Connector,
+            t -> &ClientTasks,
+    }
+    // `=>;` indicates that this is only a sink, not a source
+    ErrorAggregator{io::stderr as io::stream[write]} Error =>;
+    Connector -> match {
+        // TODO: can we be explicit about dropping any elements in the `&ClientTasks`
+        // stream for which the `Connector` fails to create a `Client`?
+        client::Client -> &ClientTasks,
+        Error -> ErrorAggregator
+    }
+    $Runner: Client, source(Task) => Output | Error;
+    &ClientTasks -> $Runner
+    SuccessAggregator{io::stdout as io::stream[write]} Output =>;
+    $Runner -> match {
+        Output -> SuccessAggregator
+        Error -> ErrorAggregator
+    }
+}
+
+// The `Aggregators` could also be part of the context:
+
+flow Main {
+    TaskMaker{os::args, os::fs[read]} => descr: Descriptor, t: source(Task);
+    ErrorAggregator{io::stderr as io::stream[write]} Error =>;
+    // `?=>` indicates that elements "sunk" into the actor may be "skipped" on output.
+    Connector{ErrorAggregator}: Descriptor ?=> Client;
+
+    TaskMaker -> split {
+        // This is nice because there's no longer any confusion about how the
+        // two parts of a `&ClientTasks` element are associated.
+        // TODO: can we be explicit about dropping any elements in the `&ClientTasks`
+        // stream for which the `Connector` fails to create a `Client`?
+        // Or is it sufficient to always assume that all paths must succeed, or
+        // the `&ClientTasks` just gets "dropped"?
+        descr -> Connector ?-> &ClientTasks,
+        t -> &ClientTasks,
+    }
+    SuccessAggregator{io::stdout as io::stream[write]};
+    $Runner{ErrorAggregator, SuccessAggregator}: Client, source(Task) =>;
+    &ClientTasks -> $Runner
+}
