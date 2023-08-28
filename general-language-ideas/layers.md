@@ -1,7 +1,9 @@
 DSLs for different "layers" of the application
 
 Should be largely "modular"/"composable"/"pluggable" in the sense that one
-layer does not impose many requirements on another
+layer does not impose many requirements on another; _however_, there should be
+some way for the data-definition layer to coordinate with the computation layer
+to ensure that the overall implementation is efficient but safe
 
 General open question for layers with "thick" implementations (esp. data-flow
 layer): how much control should "power-users" be given to tweak/modify/control
