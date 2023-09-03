@@ -5,3 +5,10 @@
 - PEG's/Pest's concept of auto-inserting comments and whitespace outside of tokens makes a lot of sense. 
 - "labeled contexts" - not fully context-free, but only as much as necessary to parse things like heredocs 
   - probably not more powerful than Pest's stack? 
+
+Links:
+
+* https://matklad.github.io/2018/06/06/modern-parser-generator.html
+* https://github.com/tree-sitter/tree-sitter
+* https://www.eyalkalderon.com/nom-error-recovery/
+* https://github.com/lalrpop/lalrpop
